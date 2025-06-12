@@ -19,35 +19,50 @@ function Dashboard() {
 
   const fetchDashboardData = async () => {
     try {
-      // Fetch customers
-      const customersResponse = await fetch('/api/clients');
-      const customersData = await customersResponse.json();
+      // Fetch clients
+      const clientsResponse = await fetch('/api/clients');
+      if (!clientsResponse.ok) {
+        throw new Error('Failed to fetch clients');
+      }
+      const clientsData = await clientsResponse.json();
 
-      // Fetch purchases
-      const purchasesResponse = await fetch('/api/transactions');
-      const purchasesData = await purchasesResponse.json();
+      // Fetch transactions
+      const transactionsResponse = await fetch('/api/transactions');
+      if (!transactionsResponse.ok) {
+        throw new Error('Failed to fetch transactions');
+      }
+      const transactionsData = await transactionsResponse.json();
 
       // Calculate statistics
-      const totalRevenue = purchasesData.reduce((sum, purchase) => sum + purchase.points, 0);
-      const totalPoints = customersData.reduce((sum, customer) => sum + customer.points, 0);
+      const totalRevenue = Array.isArray(transactionsData) 
+        ? transactionsData.reduce((sum, transaction) => sum + (transaction.points || 0), 0)
+        : 0;
+
+      const totalPoints = Array.isArray(clientsData)
+        ? clientsData.reduce((sum, client) => sum + (client.points || 0), 0)
+        : 0;
 
       setStats({
-        totalCustomers: customersData.length,
-        totalPurchases: purchasesData.length,
+        totalCustomers: Array.isArray(clientsData) ? clientsData.length : 0,
+        totalPurchases: Array.isArray(transactionsData) ? transactionsData.length : 0,
         totalRevenue,
         totalPoints
       });
 
       // Get recent purchases
-      const sortedPurchases = [...purchasesData]
-        .sort((a, b) => new Date(b.date) - new Date(a.date))
-        .slice(0, 5);
+      const sortedPurchases = Array.isArray(transactionsData)
+        ? [...transactionsData]
+            .sort((a, b) => new Date(b.date) - new Date(a.date))
+            .slice(0, 5)
+        : [];
       setRecentPurchases(sortedPurchases);
 
       // Get top customers
-      const sortedCustomers = [...customersData]
-        .sort((a, b) => b.points - a.points)
-        .slice(0, 5);
+      const sortedCustomers = Array.isArray(clientsData)
+        ? [...clientsData]
+            .sort((a, b) => (b.points || 0) - (a.points || 0))
+            .slice(0, 5)
+        : [];
       setTopCustomers(sortedCustomers);
 
       setLoading(false);
@@ -83,7 +98,7 @@ function Dashboard() {
         </div>
       </div>
 
-      <div className="dashboard-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1rem' }}>
         <div className="card">
           <h3>Recent Purchases</h3>
           <div className="table-container">
@@ -99,7 +114,7 @@ function Dashboard() {
                 {recentPurchases.map(purchase => (
                   <tr key={purchase._id}>
                     <td>{new Date(purchase.date).toLocaleDateString()}</td>
-                    <td>{purchase.client.name}</td>
+                    <td>{purchase.client?.name || 'Unknown'}</td>
                     <td>{purchase.points}</td>
                   </tr>
                 ))}
@@ -124,8 +139,8 @@ function Dashboard() {
               <tbody>
                 {topCustomers.map(customer => (
                   <tr key={customer._id}>
-                    <td>{customer.name}</td>
-                    <td>{customer.points}</td>
+                    <td>{customer.firstName} {customer.lastName}</td>
+                    <td>{customer.points || 0}</td>
                   </tr>
                 ))}
               </tbody>
