@@ -2,22 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 function CustomerList() {
-  const [customers, setCustomers] = useState([]);
+  const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetchCustomers();
+    fetchClients();
   }, []);
 
-  const fetchCustomers = async () => {
+  const fetchClients = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/customers');
+      const response = await fetch('/api/clients');
       if (!response.ok) {
-        throw new Error('Failed to fetch customers');
+        throw new Error('Failed to fetch clients');
       }
       const data = await response.json();
-      setCustomers(data);
+      setClients(data);
       setLoading(false);
     } catch (err) {
       setError(err.message);
@@ -26,15 +26,15 @@ function CustomerList() {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this customer?')) {
+    if (window.confirm('Are you sure you want to delete this client?')) {
       try {
-        const response = await fetch(`http://localhost:5000/api/customers/${id}`, {
+        const response = await fetch(`/api/clients/${id}`, {
           method: 'DELETE',
         });
         if (!response.ok) {
-          throw new Error('Failed to delete customer');
+          throw new Error('Failed to delete client');
         }
-        setCustomers(customers.filter(customer => customer._id !== id));
+        setClients(clients.filter(client => client._id !== id));
       } catch (err) {
         setError(err.message);
       }
@@ -46,9 +46,9 @@ function CustomerList() {
 
   return (
     <div className="table-container">
-      <h2>Customers</h2>
-      <Link to="/customers/new" className="btn btn-primary" style={{ marginBottom: '1rem' }}>
-        Add New Customer
+      <h2>Clients</h2>
+      <Link to="/clients/new" className="btn btn-primary" style={{ marginBottom: '1rem' }}>
+        Add New Client
       </Link>
       <table>
         <thead>
@@ -56,27 +56,25 @@ function CustomerList() {
             <th>Name</th>
             <th>Email</th>
             <th>Phone</th>
-            <th>Membership Tier</th>
-            <th>Rewards Points</th>
-            <th>Total Spent</th>
+            <th>Address</th>
+            <th>Points</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {customers.map(customer => (
-            <tr key={customer._id}>
-              <td>{`${customer.firstName} ${customer.lastName}`}</td>
-              <td>{customer.email}</td>
-              <td>{customer.phone}</td>
-              <td>{customer.membershipTier}</td>
-              <td>{customer.rewardsPoints}</td>
-              <td>${customer.totalSpent.toFixed(2)}</td>
+          {clients.map(client => (
+            <tr key={client._id}>
+              <td>{client.name}</td>
+              <td>{client.email}</td>
+              <td>{client.phone}</td>
+              <td>{client.address}</td>
+              <td>{client.points}</td>
               <td>
-                <Link to={`/customers/${customer._id}`} className="btn btn-primary" style={{ marginRight: '0.5rem' }}>
+                <Link to={`/clients/${client._id}`} className="btn btn-primary" style={{ marginRight: '0.5rem' }}>
                   Edit
                 </Link>
                 <button
-                  onClick={() => handleDelete(customer._id)}
+                  onClick={() => handleDelete(client._id)}
                   className="btn btn-danger"
                 >
                   Delete

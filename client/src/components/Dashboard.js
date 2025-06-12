@@ -20,16 +20,16 @@ function Dashboard() {
   const fetchDashboardData = async () => {
     try {
       // Fetch customers
-      const customersResponse = await fetch('http://localhost:5000/api/customers');
+      const customersResponse = await fetch('/api/clients');
       const customersData = await customersResponse.json();
 
       // Fetch purchases
-      const purchasesResponse = await fetch('http://localhost:5000/api/purchases');
+      const purchasesResponse = await fetch('/api/transactions');
       const purchasesData = await purchasesResponse.json();
 
       // Calculate statistics
-      const totalRevenue = purchasesData.reduce((sum, purchase) => sum + purchase.total, 0);
-      const totalPoints = customersData.reduce((sum, customer) => sum + customer.rewardsPoints, 0);
+      const totalRevenue = purchasesData.reduce((sum, purchase) => sum + purchase.points, 0);
+      const totalPoints = customersData.reduce((sum, customer) => sum + customer.points, 0);
 
       setStats({
         totalCustomers: customersData.length,
@@ -40,13 +40,13 @@ function Dashboard() {
 
       // Get recent purchases
       const sortedPurchases = [...purchasesData]
-        .sort((a, b) => new Date(b.purchaseDate) - new Date(a.purchaseDate))
+        .sort((a, b) => new Date(b.date) - new Date(a.date))
         .slice(0, 5);
       setRecentPurchases(sortedPurchases);
 
       // Get top customers
       const sortedCustomers = [...customersData]
-        .sort((a, b) => b.totalSpent - a.totalSpent)
+        .sort((a, b) => b.points - a.points)
         .slice(0, 5);
       setTopCustomers(sortedCustomers);
 
@@ -92,22 +92,22 @@ function Dashboard() {
                 <tr>
                   <th>Date</th>
                   <th>Customer</th>
-                  <th>Total</th>
+                  <th>Points</th>
                 </tr>
               </thead>
               <tbody>
                 {recentPurchases.map(purchase => (
                   <tr key={purchase._id}>
-                    <td>{new Date(purchase.purchaseDate).toLocaleDateString()}</td>
-                    <td>{`${purchase.customer.firstName} ${purchase.customer.lastName}`}</td>
-                    <td>${purchase.total.toFixed(2)}</td>
+                    <td>{new Date(purchase.date).toLocaleDateString()}</td>
+                    <td>{purchase.client.name}</td>
+                    <td>{purchase.points}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-          <Link to="/purchases" className="btn btn-primary" style={{ marginTop: '1rem' }}>
-            View All Purchases
+          <Link to="/transactions" className="btn btn-primary" style={{ marginTop: '1rem' }}>
+            View All Transactions
           </Link>
         </div>
 
@@ -118,22 +118,20 @@ function Dashboard() {
               <thead>
                 <tr>
                   <th>Customer</th>
-                  <th>Total Spent</th>
                   <th>Points</th>
                 </tr>
               </thead>
               <tbody>
                 {topCustomers.map(customer => (
                   <tr key={customer._id}>
-                    <td>{`${customer.firstName} ${customer.lastName}`}</td>
-                    <td>${customer.totalSpent.toFixed(2)}</td>
-                    <td>{customer.rewardsPoints}</td>
+                    <td>{customer.name}</td>
+                    <td>{customer.points}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-          <Link to="/customers" className="btn btn-primary" style={{ marginTop: '1rem' }}>
+          <Link to="/clients" className="btn btn-primary" style={{ marginTop: '1rem' }}>
             View All Customers
           </Link>
         </div>
