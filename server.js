@@ -12,16 +12,12 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// MongoDB Connection
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://marcushtx22:Blahblah123!!@cluster0.nmap4rg.mongodb.net/cannabis-rewards?retryWrites=true&w=majority&appName=Cluster0';
-
-mongoose.connect(MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-})
-.then(() => console.log('MongoDB connected successfully'))
-.catch(err => console.error('MongoDB connection error:', err));
+// Connect to MongoDB
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => console.log('MongoDB connected'))
+  .catch(err => console.log('MongoDB connection error:', err));
 
 // API Routes
 app.use('/api/auth', require('./routes/auth'));
@@ -37,15 +33,12 @@ app.get('/api', (req, res) => {
 // Serve static assets in production
 if (process.env.NODE_ENV === 'production') {
     // Set static folder
-    app.use(express.static('client/build'));
+    app.use(express.static(path.join(__dirname, 'client/build')));
 
     app.get('*', (req, res) => {
-        res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'));
+        res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
     });
 }
 
-// Start server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-}); 
+app.listen(PORT, () => console.log(`Server is running on port ${PORT}`)); 

@@ -17,6 +17,9 @@ function CustomerList() {
         throw new Error('Failed to fetch clients');
       }
       const data = await response.json();
+      if (!Array.isArray(data)) {
+        throw new Error('Invalid data format received from server');
+      }
       setClients(data);
       setLoading(false);
     } catch (err) {
@@ -56,7 +59,6 @@ function CustomerList() {
             <th>Name</th>
             <th>Email</th>
             <th>Phone</th>
-            <th>Address</th>
             <th>Points</th>
             <th>Actions</th>
           </tr>
@@ -64,11 +66,10 @@ function CustomerList() {
         <tbody>
           {clients.map(client => (
             <tr key={client._id}>
-              <td>{client.name}</td>
+              <td>{client.firstName} {client.lastName}</td>
               <td>{client.email}</td>
               <td>{client.phone}</td>
-              <td>{client.address}</td>
-              <td>{client.points}</td>
+              <td>{client.points || 0}</td>
               <td>
                 <Link to={`/clients/${client._id}`} className="btn btn-primary" style={{ marginRight: '0.5rem' }}>
                   Edit
