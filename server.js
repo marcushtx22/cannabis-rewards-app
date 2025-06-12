@@ -23,9 +23,16 @@ mongoose.connect(MONGODB_URI, {
 .then(() => console.log('MongoDB connected successfully'))
 .catch(err => console.error('MongoDB connection error:', err));
 
-// Routes
-app.use('/api/customers', require('./routes/customers'));
-app.use('/api/purchases', require('./routes/purchases'));
+// API Routes
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/clients', require('./routes/clients'));
+app.use('/api/rewards', require('./routes/rewards'));
+app.use('/api/transactions', require('./routes/transactions'));
+
+// Basic route
+app.get('/api', (req, res) => {
+    res.json({ message: 'Welcome to Cannabis Rewards API' });
+});
 
 // Serve static assets in production
 if (process.env.NODE_ENV === 'production') {
@@ -36,17 +43,6 @@ if (process.env.NODE_ENV === 'production') {
         res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'));
     });
 }
-
-// Basic route
-app.get('/', (req, res) => {
-    res.json({ message: 'Welcome to Cannabis Rewards API' });
-});
-
-// Routes
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/clients', require('./routes/clients'));
-app.use('/api/rewards', require('./routes/rewards'));
-app.use('/api/transactions', require('./routes/transactions'));
 
 // Start server
 const PORT = process.env.PORT || 5000;
