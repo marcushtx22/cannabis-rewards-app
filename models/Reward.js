@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const rewardSchema = new mongoose.Schema({
+const RewardSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true
@@ -9,31 +9,22 @@ const rewardSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  pointsCost: {
+  pointsRequired: {
     type: Number,
     required: true
   },
-  discountAmount: {
+  discount: {
     type: Number,
-    required: true
-  },
-  discountType: {
-    type: String,
-    enum: ['percentage', 'fixed'],
-    required: true
-  },
-  validFrom: {
-    type: Date,
-    required: true
-  },
-  validUntil: {
-    type: Date,
     required: true
   },
   isActive: {
     type: Boolean,
     default: true
+  },
+  date: {
+    type: Date,
+    default: Date.now
   }
 });
 
-module.exports = mongoose.model('Reward', rewardSchema); 
+module.exports = mongoose.model('Reward', RewardSchema); 

@@ -47,11 +47,10 @@ router.post('/', [
 // @desc    Get all clients
 router.get('/', async (req, res) => {
   try {
-    const clients = await Client.find().select('-idVerification');
+    const clients = await Client.find();
     res.json(clients);
   } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server error');
+    res.status(500).json({ message: err.message });
   }
 });
 
@@ -59,17 +58,51 @@ router.get('/', async (req, res) => {
 // @desc    Get client by ID
 router.get('/:id', async (req, res) => {
   try {
-    const client = await Client.findById(req.params.id).select('-idVerification');
+    const client = await Client.findById(req.params.id);
     if (!client) {
-      return res.status(404).json({ msg: 'Client not found' });
+      return res.status(404).json({ message: 'Client not found' });
     }
     res.json(client);
   } catch (err) {
-    console.error(err.message);
-    if (err.kind === 'ObjectId') {
-      return res.status(404).json({ msg: 'Client not found' });
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// @route   PATCH api/clients/:id
+// @desc    Update a client
+router.patch('/:id', async (req, res) => {
+  try {
+    const client = await Client.findById(req.params.id);
+    if (!client) {
+      return res.status(404).json({ message: 'Client not found' });
     }
-    res.status(500).send('Server error');
+
+    if (req.body.firstName) client.firstName = req.body.firstName;
+    if (req.body.lastName) client.lastName = req.body.lastName;
+    if (req.body.email) client.email = req.body.email;
+    if (req.body.phone) client.phone = req.body.phone;
+    if (req.body.dateOfBirth) client.dateOfBirth = req.body.dateOfBirth;
+    if (req.body.idVerification) client.idVerification = req.body.idVerification;
+
+    const updatedClient = await client.save();
+    res.json(updatedClient);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
+// @route   DELETE api/clients/:id
+// @desc    Delete a client
+router.delete('/:id', async (req, res) => {
+  try {
+    const client = await Client.findById(req.params.id);
+    if (!client) {
+      return res.status(404).json({ message: 'Client not found' });
+    }
+    await client.remove();
+    res.json({ message: 'Client deleted' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 });
 
